@@ -1,32 +1,25 @@
-import { db } from "@/app/db";
-import { redirect } from "next/navigation";
+"use client";
+
+import { createSnippet } from "@/app/actions";
+import { useState } from "react";
+import { useFormState } from "react-dom";
+import Editor from "@monaco-editor/react";
 
 export default function CreateSnippet() {
-  async function createSnippet(formData: FormData) {
-    // mark the function as server action
-    "use server";
-
-    // get and validate input fields
-    const title = formData.get("title") as string;
-    const code = formData.get("code") as string;
-
-    // save the data
-    const snippet = await db.snippet.create({
-      data: {
-        title,
-        code,
-      },
-    });
-
-    console.log(snippet);
-
-    // redirect user back to home
-    redirect("/");
-  }
+  const [code, setCode] = useState("");
+  const [formState, action] = useFormState(createSnippet, {
+    message: "",
+  });
 
   return (
-    <form action={createSnippet}>
+    <form action={action}>
       <h1 className="font-bold text-2xl m-4">Create Snippet</h1>
+
+      {formState.message && (
+        <div className="my-2 p-2 bg-red-600 rounded text-white">
+          {formState.message}
+        </div>
+      )}
 
       <div className="flex flex-col gap-4 m-4">
         <div className="flex flex-col gap-2">
@@ -35,7 +28,15 @@ export default function CreateSnippet() {
         </div>
         <div className="flex flex-col gap-2">
           <label htmlFor="code">Code</label>
-          <textarea name="code" id="code" className="border p-2"></textarea>
+          {/* <textarea name="code" id="code" className="border p-2"></textarea> */}
+          <Editor
+            language="javascript"
+            height={"40vh"}
+            theme="vs-dark"
+            value={code}
+            onChange={(val) => setCode(val ? val : "")}
+          />
+          <input type="hidden" name="code" value={code} />
         </div>
 
         <button className="bg-blue-400 hover:bg-blue-500 p-2 text-white rounded">
