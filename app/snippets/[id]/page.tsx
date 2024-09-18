@@ -45,3 +45,12 @@ export default async function ShowSnippetPage(props: ShowSnippetPageProps) {
     </div>
   );
 }
+
+// below code will generate static pages for all the snippets
+// if there is new page added, it will not be added to the static pages
+// to fix this we can use revalidate option in editSnippet action.
+export async function generateStaticParams() {
+  const snippets = await db.snippet.findMany();
+
+  return snippets.map((snippet) => ({ id: snippet.id.toString() }));
+}
